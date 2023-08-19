@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder;
 
 import java.security.*;
 import java.util.ArrayList;
-import java.util.Base64;
+import org.apache.commons.codec.binary.Base64;
 import java.util.List;
 
 /**
@@ -75,7 +75,7 @@ public class StringUtil {
     }
 
     public static String getStringFromKey(Key key) {
-        return Base64.getEncoder().encodeToString(key.getEncoded());
+        return Base64.encodeBase64String(key.getEncoded());
     }
 
     public static String getMerkleRoot(ArrayList<Transaction> transactions) {
