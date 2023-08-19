@@ -13,9 +13,21 @@ import java.security.PublicKey;
  */
 public class TransactionOutput {
 
+    /**
+     * 当前交易id
+     */
     public String id;
+    /**
+     * 资金接收者公钥
+     */
     public PublicKey reciepient; //also known as the new owner of these coins.
+    /**
+     * 交易金额
+     */
     public float value; //the amount of coins they own
+    /**
+     * 来源交易id
+     */
     public String parentTransactionId; //the id of the transaction this output was created in
 
     //Constructor

@@ -13,17 +13,35 @@ import java.util.HashMap;
  */
 public class
 NoobChain {
+    /**
+     * 链上的区块链
+     */
     public static ArrayList<Block> blockchain = new ArrayList<Block>();
+    /**
+     * 链上的未消费金额信息
+     */
     public static HashMap<String,TransactionOutput> UTXOs = new HashMap<String,TransactionOutput>();
 
+    /**
+     * 挖矿的难度
+     */
     public static int difficulty = 3;
+
+    /**
+     * 最小可交易的基恩
+     */
     public static float minimumTransaction = 0.1f;
     public static Wallet walletA;
     public static Wallet walletB;
+
+    /**
+     * 币基交易
+     */
     public static Transaction genesisTransaction;
 
     public static void main(String[] args) {
         //add our blocks to the blockchain ArrayList:
+        // BouncyCastle是一个提供了很多哈希算法和加密算法的第三方库。它提供了Java标准库没有的一些算法，例如，RipeMD160哈希算法。
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider()); //Setup Bouncey castle as a Security Provider
 
         //Create wallets:
@@ -32,10 +50,15 @@ NoobChain {
         Wallet coinbase = new Wallet();
 
         //create genesis transaction, which sends 100 NoobCoin to walletA:
+        // 创建币基交易，将100元转给钱包A
         genesisTransaction = new Transaction(coinbase.publicKey, walletA.publicKey, 100f, null);
+        // 用币基的私钥进行校验
         genesisTransaction.generateSignature(coinbase.privateKey);	 //manually sign the genesis transaction
+        // 设置该交易的交易id为0
         genesisTransaction.transactionId = "0"; //manually set the transaction id
+        // 币基交易的输出
         genesisTransaction.outputs.add(new TransactionOutput(genesisTransaction.reciepient, genesisTransaction.value, genesisTransaction.transactionId)); //manually add the Transactions Output
+        // 币基交易作为第一个交易放到总的utxo中
         UTXOs.put(genesisTransaction.outputs.get(0).id, genesisTransaction.outputs.get(0)); //its important to store our first transaction in the UTXOs list.
 
         System.out.println("Creating and Mining Genesis block... ");
@@ -74,6 +97,7 @@ NoobChain {
         Block previousBlock;
         String hashTarget = new String(new char[difficulty]).replace('\0', '0');
         HashMap<String,TransactionOutput> tempUTXOs = new HashMap<String,TransactionOutput>(); //a temporary working list of unspent transactions at a given block state.
+        // 将币基交易放到utxo中
         tempUTXOs.put(genesisTransaction.outputs.get(0).id, genesisTransaction.outputs.get(0));
 
         //loop through blockchain to check hashes:
@@ -99,18 +123,23 @@ NoobChain {
 
             //loop thru blockchains transactions:
             TransactionOutput tempOutput;
+            // 校验当前区块交易是否正确
             for(int t=0; t <currentBlock.transactions.size(); t++) {
                 Transaction currentTransaction = currentBlock.transactions.get(t);
 
+                // 校验当前交易是否由对应的转账者所发起的
                 if(!currentTransaction.verifySignature()) {
                     System.out.println("#Signature on Transaction(" + t + ") is Invalid");
                     return false;
                 }
+
+                // 校验交易的输入与交易的输出金额是否一直
                 if(currentTransaction.getInputsValue() != currentTransaction.getOutputsValue()) {
                     System.out.println("#Inputs are note equal to outputs on Transaction(" + t + ")");
                     return false;
                 }
 
+                // 从头到尾，校验每笔来源交易与utxo的交易是否一致。并且tempUTXOs删除已经使用过的交易
                 for(TransactionInput input: currentTransaction.inputs) {
                     tempOutput = tempUTXOs.get(input.transactionOutputId);
 
@@ -127,6 +156,7 @@ NoobChain {
                     tempUTXOs.remove(input.transactionOutputId);
                 }
 
+                // 将每笔交易的输出交易放到tempUTXOs中，即存放未使用的交易
                 for(TransactionOutput output: currentTransaction.outputs) {
                     tempUTXOs.put(output.id, output);
                 }
