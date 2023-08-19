@@ -11,7 +11,8 @@ import java.util.HashMap;
  * @email i@merryyou.cn
  * @since 1.0
  */
-public class NoobChain {
+public class
+NoobChain {
     public static ArrayList<Block> blockchain = new ArrayList<Block>();
     public static HashMap<String,TransactionOutput> UTXOs = new HashMap<String,TransactionOutput>();
 
